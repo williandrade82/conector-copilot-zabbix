@@ -1,0 +1,893 @@
+openapi: 3.0.3
+info:
+  title: Conector Copilot Zabbix
+  description: 'Consultas somente leitura ao Zabbix para o Copilot: hosts, incidentes,
+    disponibilidade, alertas críticos e gráficos. Inclui hosts VMware vSphere (VMs,
+    hypervisors e vCenter) monitorados pelos templates oficiais.'
+  version: 0.1.0
+paths:
+  /hosts:
+    get:
+      tags:
+      - consultas
+      summary: Lista hosts monitorados, com filtros por nome, grupo e tipo VMware
+      operationId: listarHosts
+      security:
+      - APIKeyHeader: []
+      parameters:
+      - name: busca
+        in: query
+        required: false
+        schema:
+          description: Parte do nome do host
+          title: Busca
+          type: string
+          nullable: true
+        description: Parte do nome do host
+      - name: grupo
+        in: query
+        required: false
+        schema:
+          description: Nome do grupo de hosts
+          title: Grupo
+          type: string
+          nullable: true
+        description: Nome do grupo de hosts
+      - name: tipo
+        in: query
+        required: false
+        schema:
+          description: vm, hypervisor, vcenter ou outro
+          title: Tipo
+          type: string
+          pattern: ^(vm|hypervisor|vcenter|outro)$
+          nullable: true
+        description: vm, hypervisor, vcenter ou outro
+      - name: limite
+        in: query
+        required: false
+        schema:
+          description: Máximo de itens (padrão 50)
+          title: Limite
+          type: integer
+          maximum: 200
+          minimum: 1
+          nullable: true
+        description: Máximo de itens (padrão 50)
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaHosts'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /incidentes:
+    get:
+      tags:
+      - consultas
+      summary: Problemas ativos (não resolvidos), do mais recente para o mais antigo
+      operationId: listarIncidentes
+      security:
+      - APIKeyHeader: []
+      parameters:
+      - name: severidade_min
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 5
+          minimum: 0
+          description: 0 Não classificada a 5 Desastre
+          default: 0
+          title: Severidade Min
+        description: 0 Não classificada a 5 Desastre
+      - name: host
+        in: query
+        required: false
+        schema:
+          description: Parte do nome do host
+          title: Host
+          type: string
+          nullable: true
+        description: Parte do nome do host
+      - name: grupo
+        in: query
+        required: false
+        schema:
+          description: Nome do grupo de hosts
+          title: Grupo
+          type: string
+          nullable: true
+        description: Nome do grupo de hosts
+      - name: apenas_nao_reconhecidos
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Apenas Nao Reconhecidos
+      - name: limite
+        in: query
+        required: false
+        schema:
+          description: Máximo de itens (padrão 50)
+          title: Limite
+          type: integer
+          maximum: 200
+          minimum: 1
+          nullable: true
+        description: Máximo de itens (padrão 50)
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaIncidentes'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /alertas-criticos:
+    get:
+      tags:
+      - consultas
+      summary: Problemas ativos de severidade Alta e Desastre
+      operationId: listarAlertasCriticos
+      security:
+      - APIKeyHeader: []
+      parameters:
+      - name: host
+        in: query
+        required: false
+        schema:
+          description: Parte do nome do host
+          title: Host
+          type: string
+          nullable: true
+        description: Parte do nome do host
+      - name: grupo
+        in: query
+        required: false
+        schema:
+          description: Nome do grupo de hosts
+          title: Grupo
+          type: string
+          nullable: true
+        description: Nome do grupo de hosts
+      - name: apenas_nao_reconhecidos
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Apenas Nao Reconhecidos
+      - name: limite
+        in: query
+        required: false
+        schema:
+          description: Máximo de itens (padrão 50)
+          title: Limite
+          type: integer
+          maximum: 200
+          minimum: 1
+          nullable: true
+        description: Máximo de itens (padrão 50)
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaIncidentes'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /disponibilidade:
+    get:
+      tags:
+      - consultas
+      summary: Disponibilidade atual dos hosts ativos (interfaces e estado VMware)
+      description: Para VMs usa o estado de energia (vmware.vm.powerstate); para hypervisors,
+        o status geral do ESXi (vmware.hv.status); para os demais, a disponibilidade
+        das interfaces.
+      operationId: consultarDisponibilidade
+      security:
+      - APIKeyHeader: []
+      parameters:
+      - name: host
+        in: query
+        required: false
+        schema:
+          description: Parte do nome do host
+          title: Host
+          type: string
+          nullable: true
+        description: Parte do nome do host
+      - name: grupo
+        in: query
+        required: false
+        schema:
+          description: Nome do grupo de hosts
+          title: Grupo
+          type: string
+          nullable: true
+        description: Nome do grupo de hosts
+      - name: tipo
+        in: query
+        required: false
+        schema:
+          description: vm, hypervisor, vcenter ou outro
+          title: Tipo
+          type: string
+          pattern: ^(vm|hypervisor|vcenter|outro)$
+          nullable: true
+        description: vm, hypervisor, vcenter ou outro
+      - name: apenas_problemas
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: true lista só os hosts não disponíveis; false lista todos
+          default: true
+          title: Apenas Problemas
+        description: true lista só os hosts não disponíveis; false lista todos
+      - name: limite
+        in: query
+        required: false
+        schema:
+          description: Máximo de itens (padrão 50)
+          title: Limite
+          type: integer
+          maximum: 200
+          minimum: 1
+          nullable: true
+        description: Máximo de itens (padrão 50)
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Disponibilidade'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /graficos:
+    get:
+      tags:
+      - consultas
+      summary: Lista os gráficos de um host ou resume os dados de um gráfico
+      description: 'Sem grafico_id: lista os gráficos do host. Com grafico_id: devolve
+        mínimo, média, máximo, último valor e até 24 pontos por série no período.'
+      operationId: consultarGraficos
+      security:
+      - APIKeyHeader: []
+      parameters:
+      - name: host
+        in: query
+        required: false
+        schema:
+          description: Parte do nome do host
+          title: Host
+          type: string
+          nullable: true
+        description: Parte do nome do host
+      - name: busca
+        in: query
+        required: false
+        schema:
+          description: 'Parte do nome do gráfico, ex.: CPU'
+          title: Busca
+          type: string
+          nullable: true
+        description: 'Parte do nome do gráfico, ex.: CPU'
+      - name: grafico_id
+        in: query
+        required: false
+        schema:
+          description: ID do gráfico para trazer os dados
+          title: Grafico Id
+          type: string
+          nullable: true
+        description: ID do gráfico para trazer os dados
+      - name: horas
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 720
+          minimum: 1
+          description: Período em horas (padrão 24)
+          default: 24
+          title: Horas
+        description: Período em horas (padrão 24)
+      - name: limite
+        in: query
+        required: false
+        schema:
+          description: Máximo de itens (padrão 50)
+          title: Limite
+          type: integer
+          maximum: 200
+          minimum: 1
+          nullable: true
+        description: Máximo de itens (padrão 50)
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/ListaGraficos'
+                - $ref: '#/components/schemas/DadosGrafico'
+                title: Response Consultargraficos
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /hostgroups:
+    get:
+      tags:
+      - consultas
+      summary: Lista os grupos de hosts, para descobrir o nome a usar nos filtros
+      operationId: listarGruposDeHosts
+      security:
+      - APIKeyHeader: []
+      parameters:
+      - name: busca
+        in: query
+        required: false
+        schema:
+          description: Parte do nome do grupo
+          title: Busca
+          type: string
+          nullable: true
+        description: Parte do nome do grupo
+      - name: limite
+        in: query
+        required: false
+        schema:
+          description: Máximo de itens (padrão 50)
+          title: Limite
+          type: integer
+          maximum: 200
+          minimum: 1
+          nullable: true
+        description: Máximo de itens (padrão 50)
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaGrupos'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /hosts-from-hostgroup:
+    get:
+      tags:
+      - consultas
+      summary: Hosts de um grupo de hosts
+      operationId: listarHostsDoGrupo
+      security:
+      - APIKeyHeader: []
+      parameters:
+      - name: grupo
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Nome do grupo (exato ou parcial)
+          title: Grupo
+        description: Nome do grupo (exato ou parcial)
+      - name: tipo
+        in: query
+        required: false
+        schema:
+          description: vm, hypervisor, vcenter ou outro
+          title: Tipo
+          type: string
+          pattern: ^(vm|hypervisor|vcenter|outro)$
+          nullable: true
+        description: vm, hypervisor, vcenter ou outro
+      - name: limite
+        in: query
+        required: false
+        schema:
+          description: Máximo de itens (padrão 50)
+          title: Limite
+          type: integer
+          maximum: 200
+          minimum: 1
+          nullable: true
+        description: Máximo de itens (padrão 50)
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostsDoGrupo'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    DadosGrafico:
+      properties:
+        id:
+          type: string
+          title: Id
+        nome:
+          type: string
+          title: Nome
+        periodo_horas:
+          type: integer
+          title: Periodo Horas
+        url:
+          type: string
+          title: Url
+        series:
+          items:
+            $ref: '#/components/schemas/Serie'
+          type: array
+          title: Series
+      type: object
+      required:
+      - id
+      - nome
+      - periodo_horas
+      - url
+      - series
+      title: DadosGrafico
+    Disponibilidade:
+      properties:
+        resumo:
+          $ref: '#/components/schemas/ResumoDisponibilidade'
+        por_tipo:
+          additionalProperties:
+            $ref: '#/components/schemas/ResumoDisponibilidade'
+          type: object
+          title: Por Tipo
+        hosts_analisados_truncado:
+          type: boolean
+          title: Hosts Analisados Truncado
+          description: true se havia mais hosts que o teto de análise
+        hosts:
+          items:
+            $ref: '#/components/schemas/HostDisponibilidade'
+          type: array
+          title: Hosts
+          description: Hosts não disponíveis, ou todos os filtrados se apenas_problemas=false
+      type: object
+      required:
+      - resumo
+      - por_tipo
+      - hosts_analisados_truncado
+      - hosts
+      title: Disponibilidade
+    Grafico:
+      properties:
+        id:
+          type: string
+          title: Id
+        nome:
+          type: string
+          title: Nome
+        hosts:
+          items:
+            type: string
+          type: array
+          title: Hosts
+        url:
+          type: string
+          title: Url
+          description: Link do gráfico na interface do Zabbix (exige login)
+      type: object
+      required:
+      - id
+      - nome
+      - hosts
+      - url
+      title: Grafico
+    GrupoHosts:
+      properties:
+        id:
+          type: string
+          title: Id
+        nome:
+          type: string
+          title: Nome
+        total_hosts:
+          type: integer
+          title: Total Hosts
+      type: object
+      required:
+      - id
+      - nome
+      - total_hosts
+      title: GrupoHosts
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    Host:
+      properties:
+        id:
+          type: string
+          title: Id
+        host:
+          type: string
+          title: Host
+          description: Nome técnico do host no Zabbix
+        nome:
+          type: string
+          title: Nome
+          description: Nome visível do host
+        status:
+          type: string
+          title: Status
+          description: ativo ou desativado
+        em_manutencao:
+          type: boolean
+          title: Em Manutencao
+        tipo:
+          type: string
+          title: Tipo
+          description: vm, hypervisor, vcenter ou outro (pelos templates VMware)
+        grupos:
+          items:
+            type: string
+          type: array
+          title: Grupos
+        ips:
+          items:
+            type: string
+          type: array
+          title: Ips
+        disponibilidade:
+          type: string
+          title: Disponibilidade
+          description: disponivel, indisponivel ou desconhecido, pelas interfaces
+            do host. Hosts VMware não têm interface; use /disponibilidade para o estado
+            deles.
+      type: object
+      required:
+      - id
+      - host
+      - nome
+      - status
+      - em_manutencao
+      - tipo
+      - grupos
+      - ips
+      - disponibilidade
+      title: Host
+    HostDisponibilidade:
+      properties:
+        id:
+          type: string
+          title: Id
+        nome:
+          type: string
+          title: Nome
+        tipo:
+          type: string
+          title: Tipo
+        disponibilidade:
+          type: string
+          title: Disponibilidade
+          description: disponivel, indisponivel, degradado ou desconhecido
+        detalhe:
+          type: string
+          title: Detalhe
+      type: object
+      required:
+      - id
+      - nome
+      - tipo
+      - disponibilidade
+      - detalhe
+      title: HostDisponibilidade
+    HostsDoGrupo:
+      properties:
+        grupo:
+          $ref: '#/components/schemas/GrupoHosts'
+        retornados:
+          type: integer
+          title: Retornados
+        possivelmente_truncado:
+          type: boolean
+          title: Possivelmente Truncado
+        hosts:
+          items:
+            $ref: '#/components/schemas/Host'
+          type: array
+          title: Hosts
+      type: object
+      required:
+      - grupo
+      - retornados
+      - possivelmente_truncado
+      - hosts
+      title: HostsDoGrupo
+    Incidente:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: eventid do problema
+        nome:
+          type: string
+          title: Nome
+        severidade:
+          type: string
+          title: Severidade
+        severidade_nivel:
+          type: integer
+          title: Severidade Nivel
+          description: 0 a 5 (5 = Desastre)
+        hosts:
+          items:
+            type: string
+          type: array
+          title: Hosts
+        inicio:
+          type: string
+          title: Inicio
+          description: Data/hora de início em ISO 8601 (UTC)
+        duracao:
+          type: string
+          title: Duracao
+          description: 'Duração legível, ex.: 2d 3h 10m'
+        reconhecido:
+          type: boolean
+          title: Reconhecido
+        suprimido:
+          type: boolean
+          title: Suprimido
+      type: object
+      required:
+      - id
+      - nome
+      - severidade
+      - severidade_nivel
+      - hosts
+      - inicio
+      - duracao
+      - reconhecido
+      - suprimido
+      title: Incidente
+    ListaGraficos:
+      properties:
+        retornados:
+          type: integer
+          title: Retornados
+        possivelmente_truncado:
+          type: boolean
+          title: Possivelmente Truncado
+        graficos:
+          items:
+            $ref: '#/components/schemas/Grafico'
+          type: array
+          title: Graficos
+      type: object
+      required:
+      - retornados
+      - possivelmente_truncado
+      - graficos
+      title: ListaGraficos
+    ListaGrupos:
+      properties:
+        retornados:
+          type: integer
+          title: Retornados
+        possivelmente_truncado:
+          type: boolean
+          title: Possivelmente Truncado
+        grupos:
+          items:
+            $ref: '#/components/schemas/GrupoHosts'
+          type: array
+          title: Grupos
+      type: object
+      required:
+      - retornados
+      - possivelmente_truncado
+      - grupos
+      title: ListaGrupos
+    ListaHosts:
+      properties:
+        retornados:
+          type: integer
+          title: Retornados
+        possivelmente_truncado:
+          type: boolean
+          title: Possivelmente Truncado
+          description: true se atingiu o limite; refine os filtros
+        hosts:
+          items:
+            $ref: '#/components/schemas/Host'
+          type: array
+          title: Hosts
+      type: object
+      required:
+      - retornados
+      - possivelmente_truncado
+      - hosts
+      title: ListaHosts
+    ListaIncidentes:
+      properties:
+        retornados:
+          type: integer
+          title: Retornados
+        possivelmente_truncado:
+          type: boolean
+          title: Possivelmente Truncado
+        por_severidade:
+          additionalProperties:
+            type: integer
+          type: object
+          title: Por Severidade
+        incidentes:
+          items:
+            $ref: '#/components/schemas/Incidente'
+          type: array
+          title: Incidentes
+      type: object
+      required:
+      - retornados
+      - possivelmente_truncado
+      - por_severidade
+      - incidentes
+      title: ListaIncidentes
+    Ponto:
+      properties:
+        inicio:
+          type: string
+          title: Inicio
+        media:
+          type: number
+          title: Media
+      type: object
+      required:
+      - inicio
+      - media
+      title: Ponto
+    ResumoDisponibilidade:
+      properties:
+        total:
+          type: integer
+          title: Total
+        disponivel:
+          type: integer
+          title: Disponivel
+        indisponivel:
+          type: integer
+          title: Indisponivel
+        degradado:
+          type: integer
+          title: Degradado
+        desconhecido:
+          type: integer
+          title: Desconhecido
+        percentual_disponivel:
+          type: number
+          title: Percentual Disponivel
+      type: object
+      required:
+      - total
+      - disponivel
+      - indisponivel
+      - degradado
+      - desconhecido
+      - percentual_disponivel
+      title: ResumoDisponibilidade
+    Serie:
+      properties:
+        item:
+          type: string
+          title: Item
+        chave:
+          type: string
+          title: Chave
+        unidade:
+          type: string
+          title: Unidade
+        minimo:
+          title: Minimo
+          type: number
+          nullable: true
+        media:
+          title: Media
+          type: number
+          nullable: true
+        maximo:
+          title: Maximo
+          type: number
+          nullable: true
+        ultimo_valor:
+          title: Ultimo Valor
+          type: string
+          nullable: true
+        pontos:
+          items:
+            $ref: '#/components/schemas/Ponto'
+          type: array
+          title: Pontos
+          description: Médias por intervalo, no máximo 24 pontos
+      type: object
+      required:
+      - item
+      - chave
+      - unidade
+      - minimo
+      - media
+      - maximo
+      - ultimo_valor
+      - pontos
+      title: Serie
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+  securitySchemes:
+    APIKeyHeader:
+      type: apiKey
+      description: Chave do conector
+      in: header
+      name: X-API-Key
+servers:
+- url: https://conector-zabbix.exemplo.com

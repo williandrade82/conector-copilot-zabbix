@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: conector-copilot-zabbix
+  namespace: conector-copilot-zabbix
+  labels:
+    app.kubernetes.io/name: conector-copilot-zabbix
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: conector-copilot-zabbix
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

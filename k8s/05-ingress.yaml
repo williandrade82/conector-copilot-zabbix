@@ -1,0 +1,25 @@
+# O Copilot precisa alcançar o conector por HTTPS. Ajuste host, classe e o Secret TLS.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: conector-copilot-zabbix
+  namespace: conector-copilot-zabbix
+  labels:
+    app.kubernetes.io/name: conector-copilot-zabbix
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - conector-zabbix.exemplo.com
+      secretName: conector-copilot-zabbix-tls
+  rules:
+    - host: conector-zabbix.exemplo.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: conector-copilot-zabbix
+                port:
+                  name: http

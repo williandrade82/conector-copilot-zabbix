@@ -1,0 +1,12 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+.venv
+__pycache__
+*.pyc
+tests
+k8s
+openapi
+scripts

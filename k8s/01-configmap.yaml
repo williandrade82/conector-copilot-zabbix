@@ -1,0 +1,14 @@
+# Configurações sem segredo. URL e tokens ficam no Secret (ver 02-secret.example.yaml).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: conector-copilot-zabbix-config
+  namespace: conector-copilot-zabbix
+  labels:
+    app.kubernetes.io/name: conector-copilot-zabbix
+data:
+  ZABBIX_VERIFY_SSL: "true"
+  ZABBIX_TIMEOUT: "15"
+  DEFAULT_LIMIT: "50"
+  MAX_LIMIT: "200"
+  AVAILABILITY_SCAN_MAX: "5000"
