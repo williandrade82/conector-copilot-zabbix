@@ -1,4 +1,4 @@
-# O Copilot precisa alcançar o conector por HTTPS. Ajuste host, classe e o Secret TLS.
+# HTTPS com o certificado do Secret TLS "celesc", criado no namespace à parte. Ajuste a ingressClassName se o cluster não usar nginx.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -10,10 +10,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - conector-zabbix.exemplo.com
-      secretName: conector-copilot-zabbix-tls
+        - conector-zabbix-copilot.celesc.com.br
+      secretName: celesc
   rules:
-    - host: conector-zabbix.exemplo.com
+    - host: conector-zabbix-copilot.celesc.com.br
       http:
         paths:
           - path: /

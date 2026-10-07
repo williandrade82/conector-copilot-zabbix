@@ -85,26 +85,26 @@ Os manifests ficam em `k8s/`, no namespace `conector-copilot-zabbix`:
 | `02-secret.example.yaml` | Exemplo do Secret (não é aplicado; crie a partir do `.env`) |
 | `03-deployment.yaml` | 2 réplicas, probes, limites de recurso, usuário sem privilégio |
 | `04-service.yaml` | Service ClusterIP na porta 80 |
-| `05-ingress.yaml` | Ingress HTTPS (ajuste host, classe e Secret TLS) |
+| `05-ingress.yaml` | Ingress HTTPS em `conector-zabbix-copilot.celesc.com.br`, com o certificado do Secret TLS `celesc` |
 | `06-pdb.yaml` | PodDisruptionBudget |
 
 ```bash
-docker build -t ghcr.io/williandrade82/conector-copilot-zabbix:0.1.0 .
-docker push ghcr.io/williandrade82/conector-copilot-zabbix:0.1.0
+docker build -t celdockerrep.celesc.com.br/conector-copilot-zabbix:0.1.0 .
+docker push celdockerrep.celesc.com.br/conector-copilot-zabbix:0.1.0
 
 kubectl apply -f k8s/00-namespace.yaml
 kubectl -n conector-copilot-zabbix create secret generic conector-copilot-zabbix-secrets --from-env-file=.env
 kubectl apply -k k8s/
 ```
 
-Ajuste a imagem em `03-deployment.yaml` e o host em `05-ingress.yaml` antes de aplicar.
+O Secret TLS `celesc` (certificado HTTPS) precisa existir no namespace antes do Ingress. Se o cluster não usar o ingress nginx, ajuste `ingressClassName` em `05-ingress.yaml`.
 
 ## Integração com o Copilot
 
 `openapi/openapi.yaml` é a especificação OpenAPI 3.0.3 para importar no Copilot (plugin de API do Microsoft 365 Copilot ou ação/conector do Copilot Studio), com autenticação por chave de API no cabeçalho `X-API-Key`. Para gerar de novo com a URL pública do conector:
 
 ```bash
-python scripts/export_openapi.py https://conector-zabbix.suaempresa.com
+python scripts/export_openapi.py https://conector-zabbix-copilot.celesc.com.br
 ```
 
 ## Perguntas em aberto

@@ -23,8 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          # Troque pela imagem publicada no seu registry.
-          image: ghcr.io/williandrade82/conector-copilot-zabbix:0.1.0
+          image: celdockerrep.celesc.com.br/conector-copilot-zabbix:0.1.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

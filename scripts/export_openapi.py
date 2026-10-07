@@ -37,7 +37,7 @@ def to_30(node):
 
 
 def main() -> None:
-    server = sys.argv[1] if len(sys.argv) > 1 else "https://conector-zabbix.exemplo.com"
+    server = sys.argv[1] if len(sys.argv) > 1 else "https://conector-zabbix-copilot.celesc.com.br"
     spec = to_30(create_app().openapi())
     spec["openapi"] = "3.0.3"
     spec["servers"] = [{"url": server}]

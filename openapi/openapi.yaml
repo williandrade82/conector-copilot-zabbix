@@ -890,4 +890,4 @@ components:
       in: header
       name: X-API-Key
 servers:
-- url: https://conector-zabbix.exemplo.com
+- url: https://conector-zabbix-copilot.celesc.com.br
