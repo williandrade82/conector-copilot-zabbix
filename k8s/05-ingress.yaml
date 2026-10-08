@@ -1,0 +1,25 @@
+# HTTPS com o certificado do Secret TLS "celesc", criado no namespace à parte. Ajuste a ingressClassName se o cluster não usar nginx.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: conector-copilot-zabbix
+  namespace: conector-copilot-zabbix
+  labels:
+    app.kubernetes.io/name: conector-copilot-zabbix
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - conector-zabbix-copilot.celesc.com.br
+      secretName: celesc
+  rules:
+    - host: conector-zabbix-copilot.celesc.com.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: conector-copilot-zabbix
+                port:
+                  name: http

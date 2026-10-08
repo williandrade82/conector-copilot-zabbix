@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements-dev.txt openapi-spec-validator
+      - run: pytest -q
+      - name: OpenAPI versionado está atualizado e válido
+        run: |
+          python scripts/export_openapi.py
+          git diff --exit-code openapi/openapi.yaml
+          python -c "import yaml; from openapi_spec_validator import validate; validate(yaml.safe_load(open('openapi/openapi.yaml')))"
+      - name: Manifests k8s
+        run: kubectl kustomize k8s/ > /dev/null
+      - name: Build da imagem
+        run: docker build -t conector-copilot-zabbix:ci .

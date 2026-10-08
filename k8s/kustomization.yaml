@@ -1,0 +1,12 @@
+# Aplicar com: kubectl apply -k k8s/
+# O Secret não está aqui: crie-o antes a partir do .env (ver 02-secret.example.yaml).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: conector-copilot-zabbix
+resources:
+  - 00-namespace.yaml
+  - 01-configmap.yaml
+  - 03-deployment.yaml
+  - 04-service.yaml
+  - 05-ingress.yaml
+  - 06-pdb.yaml

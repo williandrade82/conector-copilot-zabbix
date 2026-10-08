@@ -16,4 +16,9 @@ API conector entre o Copilot e o Zabbix. O Copilot faz perguntas; a API consulta
 
 ## Decisões pendentes
 
-Ver "Perguntas em aberto" no README: versão do Zabbix, dados a consultar e qual Copilot. Não escolher stack nem formato de integração antes dessas respostas.
+Stack definida: Python + FastAPI, Kubernetes (namespace `conector-copilot-zabbix`, manifests em `k8s/`), OpenAPI 3.0 em `openapi/`. Ainda em aberto (ver README): versão do Zabbix e qual Copilot.
+
+## Comandos
+
+- Testes: `pytest -q`
+- Regenerar a OpenAPI depois de mudar endpoints: `python scripts/export_openapi.py` (o CI falha se `openapi/openapi.yaml` estiver desatualizado).
